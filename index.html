@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Guides</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f5;
+    --surface2: #eef1ec;
+    --border: rgba(0,0,0,0.10);
+    --text: #1a1a1a;
+    --muted: #6b6f68;
+    --accent: #006747;
+    --accent2: #1a6e42;
+    --danger: #c0392b;
+    --amber: #b8860b;
+    --font-mono: 'JetBrains Mono', 'Fira Mono', monospace;
+    --font-sans: 'Inter', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+  a { color: var(--accent2); text-decoration: none; }
+
+  header { border-bottom: 1px solid var(--border); padding: 1.5rem 2rem; display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  header h1 { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+  header span { font-size: 12px; color: var(--muted); }
+  header .back { margin-left: auto; font-family: var(--font-mono); font-size: 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; padding: 4px 10px; color: var(--muted); }
+  header .back:hover { color: var(--text); }
+
+  main { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+  .card-title { font-size: 12px; font-family: var(--font-mono); color: var(--accent); font-weight: 700; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .round-card { margin-bottom: 1.5rem; }
+  .round-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+  .round-course { font-size: 15px; font-weight: 700; color: var(--accent); }
+  .round-meta { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+  .round-kpi { background: var(--surface2); border-radius: 8px; padding: 10px; text-align: center; }
+  .round-kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; font-family: var(--font-mono); }
+  .round-kpi-value { font-size: 18px; font-weight: 700; font-family: var(--font-mono); }
+
+  /* Course guides tab */
+  .guide-meta-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0 16px; }
+  .guide-rules { list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+  .guide-rules li { padding: 8px 10px; background: var(--surface2); border-radius: 6px; }
+  .yardage-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
+  .yardage-cell { background: var(--surface2); border-radius: 6px; padding: 6px 4px; text-align: center; font-family: var(--font-mono); }
+  .yardage-cell b { display: block; font-size: 11px; color: var(--accent2); }
+  .yardage-cell span { font-size: 13px; }
+  .guide-nine { margin-top: 1.5rem; }
+  .guide-hole { border-top: 1px solid var(--border); padding: 12px 0; }
+  .guide-hole:first-of-type { border-top: none; }
+  .guide-hole-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+  .guide-hole-num { font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--accent); min-width: 28px; }
+  .guide-hole-name { font-weight: 600; font-size: 13px; }
+  .guide-hole-stats { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+  .guide-clubs { font-family: var(--font-mono); font-size: 12px; color: var(--accent2); font-weight: 600; margin-left: auto; }
+  .guide-text { font-size: 13px; line-height: 1.55; padding-left: 38px; }
+  .guide-flag { display: inline-block; font-family: var(--font-mono); font-size: 10px; color: var(--amber); border: 1px solid var(--amber); border-radius: 4px; padding: 0 5px; margin-left: 6px; vertical-align: 1px; }
+  .guide-note { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-top: 1rem; }
+  @media (max-width: 600px) {
+    .guide-meta-row { grid-template-columns: repeat(2, 1fr); }
+    .guide-text { padding-left: 0; }
+    .guide-clubs { margin-left: 38px; width: 100%; }
+  }
+
+  .guide-text { max-width: 72ch; }
+
+  .course-picker { display: block; position: relative; width: fit-content; max-width: 100%; margin-bottom: 1.5rem; }
+  .course-picker select {
+    appearance: none; -webkit-appearance: none;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: var(--font-mono); font-size: 13px;
+    padding: 10px 40px 10px 14px; cursor: pointer; max-width: 100%;
+  }
+  .course-picker select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .course-picker::after {
+    content: ''; position: absolute; right: 16px; top: 50%; pointer-events: none;
+    width: 7px; height: 7px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+    transform: translateY(-70%) rotate(45deg);
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 1rem; }
+    main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⛳ golf.guide</h1>
+  <span id="header-sub"></span>
+  <a class="back" href="index.html">golf.stats</a>
+</header>
+
+<main>
+  <label class="course-picker">
+    <select id="course-select" aria-label="Choose a course" onchange="showCourse(this.value)"></select>
+  </label>
+  <div id="guides-container"></div>
+</main>
+
+<script>
+// ── Course guides (static) ─────────────────────────────────────────────
+// Carries: LM1 range averages + 11% premium-ball correction + ~3% Las Vegas altitude.
+// Layout notes sourced from GolfPass and GolfCourseGurus; holes marked verified:false
+// had no published description — confirm shape on the tee sign / GPS.
+const COURSE_GUIDES = [{
+  id: 'bali-hai',
+  short: 'Bali Hai',
+  date: '2026-10-11T09:00',
+  course: 'Bali Hai Golf Club',
+  location: 'Las Vegas, NV',
+  when: 'Sun Oct 11, 2026 · 9:00 AM',
+  tee: 'Silver (Sand)',
+  yards: 6156, par: 71, rating: 74.8, slope: 137,
+  rules: [
+    'Miss is right: aim at the left edge of every landing area and let the fade come back.',
+    'Lay up to full-wedge numbers instead of half shots.',
+    'Water on 3, 4, 5, 9, 11, 16, 18. Center of the green over every pin near water.',
+    'October overseed: expect less roll than the totals below.',
+    'Bogey is a good score on 8, 15 and 18.'
+  ],
+  yardages: [['Dr','235'],['5W','190'],['7W','175'],['5i','165'],['6i','155'],['7i','147'],['8i','135'],['9i','124'],['PW','103'],['AW','90'],['54°','75']],
+  holes: [
+    {n:1, par:4, yds:290, clubs:'5W → PW', verified:true, text:'Generous fairway, one greenside bunker on the left. Right pins are wide open; left pins bring the bunker in. Lay up to a full PW and aim right half of the green. Tame green, so be aggressive with the putt.'},
+    {n:2, par:5, yds:494, clubs:'Dr → 5W → 54°', verified:false, text:'Women’s #3 handicap. Driver, 5W, then about 70 yds with the 54°. Par is a good score.'},
+    {n:3, par:4, yds:415, name:'Shipwreck', clubs:'Dr → 7W / lay up', verified:true, text:'Doglegs right. Creek runs the entire right side and the fairway slopes toward it. Green breaks left to right off the left hillside. Tee up on the right side of the box, aim down the left edge. Miss approaches left and let the slope feed it. If the drive drifts right, lay up and take bogey.'},
+    {n:4, par:4, yds:280, clubs:'7W → PW', verified:true, text:'Pond in play on a potentially drivable hole. Don’t take the bait: check the GPS carry to the pond, stay short of it with 7W or less, full PW in.'},
+    {n:5, par:4, yds:341, clubs:'Dr → PW', verified:true, text:'Approach is a short iron over water to an island/peninsula green. Driver gets you down to PW. Middle of the green, enough club to carry the front.'},
+    {n:6, par:3, yds:121, clubs:'9i', verified:false, text:'Center of the green.'},
+    {n:7, par:5, yds:517, name:'Bali Beach', clubs:'Dr → 5i/6i → 9i', verified:true, text:'Double dogleg. Large waste bunker up the right merges into a big bunker about 100 yds short of the green. Approach from the left opens the green and takes the front-right greenside bunker out of play. Stay left all three shots; lay up short of the big bunker for a full 9i.'},
+    {n:8, par:4, yds:450, clubs:'Dr → 8i → AW', verified:false, text:'Not reachable in two. Play it as a three-shot hole; bogey is fine.'},
+    {n:9, par:3, yds:140, clubs:'8i', verified:true, text:'Ponds guard the green. Back-left pin is a sucker pin that brings the water in. Aim center no matter where the flag is. Pro shop sometimes runs a hit-the-green wager here.'},
+    {n:10, par:5, yds:472, clubs:'Dr → 6i → AW', verified:false, text:'Women’s #4 handicap. Don’t chase it in two; lay up to a full AW.'},
+    {n:11, par:3, yds:138, clubs:'8i', verified:true, text:'White sand left flows into water. Ideal shot starts right and draws in; your fade won’t, so aim at the right edge and accept right of the hole. Ridge splits the green into two sections; note which side the pin is on.'},
+    {n:12, par:4, yds:407, clubs:'Dr → 7W', verified:false, text:'Driver, then 7W to the green.'},
+    {n:13, par:4, yds:426, clubs:'Dr → 5W / lay up', verified:false, text:'5W in only from a clean lie; otherwise lay up to a full wedge.'},
+    {n:14, par:3, yds:202, clubs:'5W', verified:false, text:'Longest par 3. Aim left-center; short is fine.'},
+    {n:15, par:5, yds:498, clubs:'Dr → 6i → PW', verified:false, text:'Women’s #2 handicap. Driver, 6i layup, full PW.'},
+    {n:16, par:3, yds:98, name:'Island green', clubs:'PW', verified:true, text:'Island green with two white bunkers and a prominent ridge across the green. Play to the pin’s tier but toward the middle. Audience on the Cili patio; ignore it.'},
+    {n:17, par:4, yds:419, clubs:'Dr → 5W/7W', verified:true, text:'Dogleg (direction unconfirmed; check the tee sign). Lay up if the approach looks tight.'},
+    {n:18, par:4, yds:448, clubs:'Dr → 9i → AW', verified:true, text:'Dogleg left. Left fairway bunker carries with a modest drive; use it as the tee target. Water front-right and sand around the green. Safety is left, where the fairway runs into the green; right is wet. Wide but shallow green. Lay up left to a full AW.'}
+  ]
+}, {
+  id: 'tpc-las-vegas',
+  short: 'TPC Las Vegas',
+  date: '2026-10-16T08:45',
+  course: 'TPC Las Vegas',
+  location: 'Las Vegas, NV',
+  when: 'Fri Oct 16, 2026 · 8:45 AM',
+  tee: 'White',
+  yards: 6047, par: 71, rating: 73.7, slope: 142,
+  rules: [
+    'Desert target golf: forced carries on almost every hole. Know your carry number, not your total.',
+    'Miss is right: the arroyos on 13 and 15 run the whole right side. Aim left on both.',
+    'Desert is a penalty area. Know your drop options before you re-tee.',
+    'Greens are quick and putts break toward the Strip.',
+    'Back nine plays harder than the front. Bank shots on 4 and 17.',
+    'Bogey is a good score on 3, 6, 13 and 15.'
+  ],
+  yardages: [['Dr','235'],['5W','190'],['7W','175'],['5i','165'],['6i','155'],['7i','147'],['8i','135'],['9i','124'],['PW','103'],['AW','90'],['54°','75']],
+  holes: [
+    {n:1, par:4, yds:315, clubs:'5W → PW', verified:false, text:'Opener. Lay up to a full PW rather than a half wedge.'},
+    {n:2, par:3, yds:151, name:'Canyon', clubs:'7i', verified:true, text:'Downhill from an elevated tee to an island-style green surrounded by barranca and desert. Plays shorter than the number. One bunker on the right; the slope right of the green kicks balls back toward the hole, but anything left is lost in the desert. Aim right-center. If you miss, know your drop options before you play again.'},
+    {n:3, par:4, yds:364, clubs:'Dr → 7i', verified:true, text:'Forced carry off the tee, then an uphill approach. Fairway bunkers run the left side; keep the drive on the right half of the fairway. The fairway slope pulls approaches left toward the greenside bunkers, so stay right. Club up one for the uphill approach.'},
+    {n:4, par:5, yds:471, clubs:'Dr → 6i → AW', verified:true, text:'Plays through a canyon the full length. Your birdie chance on the front. Keep every shot in the middle and lay up to a full AW.'},
+    {n:5, par:4, yds:353, clubs:'Dr → 9i', verified:false, text:'Driver leaves about 120 in.'},
+    {n:6, par:5, yds:551, clubs:'Dr → 5W → 8i/9i', verified:false, text:'Women’s #1 handicap and the longest hole. Three full shots; par is a great score, bogey is fine.'},
+    {n:7, par:3, yds:169, clubs:'5i', verified:false, text:'Center of the green.'},
+    {n:8, par:4, yds:376, clubs:'Dr → 7i/8i', verified:false, text:'Women’s #3 handicap. Fairway first.'},
+    {n:9, par:4, yds:308, clubs:'5W → 9i', verified:false, text:'Short par 4. Lay up to a full 9i.'},
+    {n:10, par:4, yds:367, clubs:'Dr → 8i', verified:false, text:'Driver leaves about 130 in.'},
+    {n:11, par:4, yds:362, clubs:'Dr → 8i', verified:false, text:'Women’s #6 handicap.'},
+    {n:12, par:3, yds:118, clubs:'9i', verified:false, text:'Smooth 9i to the center.'},
+    {n:13, par:4, yds:364, name:'Death Valley', clubs:'Dr → 7i/8i', verified:true, text:'Sizable forced carry off the tee, often into the wind. An arroyo runs the entire right side; aim left of the fairway bunkers you can barely see. Two-tier green with four bunkers; play to the correct tier. Usually plays over par, so bogey is fine.'},
+    {n:14, par:4, yds:339, name:'Gorge-ous', clubs:'7W/5W → wedge', verified:true, text:'Blind tee shot to a hidden, split fairway; the course recommends hybrid or long iron off the tee. Take the right fairway: it leaves a short approach. The inviting left fairway leaves a much longer shot back over a gorge. Green sits on a ledge fronted by a deep arroyo, so take enough club.'},
+    {n:15, par:5, yds:531, clubs:'Dr → 5i → 8i', verified:true, text:'Women’s #2 handicap. Arroyo down the entire right side, eight bunkers, and a grass hazard about 100 yds short of the green. Usually downwind. Stay left all the way, lay up short of the grass hazard, and play it as a three-shot hole.'},
+    {n:16, par:3, yds:160, clubs:'6i/5i', verified:false, text:'Center of the green.'},
+    {n:17, par:4, yds:390, clubs:'Dr → 6i/7i', verified:true, text:'Wide-open fairway and usually downwind. Swing freely with driver. Your best scoring chance on the back.'},
+    {n:18, par:4, yds:358, clubs:'Dr → 9i', verified:true, text:'Downwind, with a decent forced carry off the tee. Water is in play; locate it on the GPS before you hit, and take the club that keeps you away from it.'}
+  ]
+}];
+
+function courseHtml(g) {
+  return [g].map(g => {
+    const holeHtml = h => `
+      <div class="guide-hole">
+        <div class="guide-hole-head">
+          <span class="guide-hole-num">${h.n}</span>
+          ${h.name ? `<span class="guide-hole-name">${h.name}</span>` : ''}
+          <span class="guide-hole-stats">Par ${h.par} · ${h.yds} yds</span>
+          ${h.verified ? '' : '<span class="guide-flag">layout unverified</span>'}
+          <span class="guide-clubs">${h.clubs}</span>
+        </div>
+        <div class="guide-text">${h.text}</div>
+      </div>`;
+    const nine = (label, list) => {
+      const yds = list.reduce((a, h) => a + h.yds, 0);
+      const par = list.reduce((a, h) => a + h.par, 0);
+      return `<div class="card guide-nine">
+        <p class="card-title">${label} · Par ${par} · ${yds.toLocaleString()} yds</p>
+        ${list.map(holeHtml).join('')}
+      </div>`;
+    };
+    return `
+      <div class="round-card">
+        <div class="round-header">
+          <span class="round-course">${g.course}</span>
+          <span class="round-meta">${g.location} · ${g.when}</span>
+        </div>
+        <div class="guide-meta-row">
+          <div class="round-kpi"><div class="round-kpi-label">Tee</div><div class="round-kpi-value" style="font-size:14px">${g.tee}</div></div>
+          <div class="round-kpi"><div class="round-kpi-label">Yards</div><div class="round-kpi-value">${g.yards.toLocaleString()}</div></div>
+          <div class="round-kpi"><div class="round-kpi-label">Par</div><div class="round-kpi-value">${g.par}</div></div>
+          <div class="round-kpi"><div class="round-kpi-label">Rating / slope</div><div class="round-kpi-value">${g.rating}/${g.slope}</div></div>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <p class="card-title">Game plan</p>
+          <ul class="guide-rules">${g.rules.map(r => `<li>${r}</li>`).join('')}</ul>
+        </div>
+        <div class="card">
+          <p class="card-title">Vegas yardages (est. total)</p>
+          <div class="yardage-strip">${g.yardages.map(([c, y]) => `<div class="yardage-cell"><b>${c}</b><span>${y}</span></div>`).join('')}</div>
+          <p class="guide-note">LM1 range avg + 11% premium ball + ~3% altitude. Adjust to your warm-up numbers.</p>
+        </div>
+        ${nine('Front nine', g.holes.slice(0, 9))}
+        ${nine('Back nine', g.holes.slice(9))}
+      </div>`;
+  }).join('');
+}
+
+
+
+function pickDefault() {
+  const fromHash = location.hash.slice(1);
+  if (COURSE_GUIDES.some(g => g.id === fromHash)) return fromHash;
+  const now = new Date();
+  // Next round that hasn't started yet (with a 6-hour grace window during the round)
+  const upcoming = COURSE_GUIDES
+    .filter(g => new Date(g.date).getTime() + 6 * 3600e3 > now.getTime())
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  return (upcoming[0] || COURSE_GUIDES[COURSE_GUIDES.length - 1]).id;
+}
+
+function showCourse(id) {
+  const g = COURSE_GUIDES.find(c => c.id === id);
+  document.getElementById('guides-container').innerHTML = courseHtml(g);
+  document.getElementById('header-sub').textContent = g.short + ' · ' + g.tee + ' tees';
+  document.title = g.short + ' · Course Guide';
+  document.getElementById('course-select').value = id;
+  if (location.hash.slice(1) !== id) history.replaceState(null, '', '#' + id);
+}
+
+function renderTabs() {
+  const now = Date.now();
+  const sorted = [...COURSE_GUIDES].sort((a, b) => new Date(a.date) - new Date(b.date));
+  document.getElementById('course-select').innerHTML = sorted.map(g => {
+    const d = new Date(g.date);
+    const played = d.getTime() + 6 * 3600e3 < now ? ' (played)' : '';
+    return `<option value="${g.id}">${g.short}${played}</option>`;
+  }).join('');
+}
+
+renderTabs();
+showCourse(pickDefault());
+window.addEventListener('hashchange', () => {
+  const id = location.hash.slice(1);
+  if (COURSE_GUIDES.some(g => g.id === id)) showCourse(id);
+});
+</script>
+</body>
+</html>
